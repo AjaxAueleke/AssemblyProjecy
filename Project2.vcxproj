@@ -148,6 +148,7 @@
     <MASM Include="Text.asm" />
   </ItemGroup>
   <ItemGroup>
+    <Text Include="ASCII.txt" />
     <Text Include="output.txt" />
     <Text Include="output2.txt" />
   </ItemGroup>

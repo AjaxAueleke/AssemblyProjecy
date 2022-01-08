@@ -26,5 +26,6 @@
     <Text Include="output2.txt">
       <Filter>Source Files</Filter>
     </Text>
+    <Text Include="ASCII.txt" />
   </ItemGroup>
 </Project>

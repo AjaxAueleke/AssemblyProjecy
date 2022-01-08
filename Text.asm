@@ -2,6 +2,14 @@ INCLUDE Irvine32.inc
 INCLUDE macros.inc
 BUFFER_SIZE = 5000
 .data
+;------ ASCII Art ------;
+
+asciBuffer BYTE BUFFER_SIZE DUP(0)
+asciFile BYTE 'ASCII.txt', 0
+asciFileHandle HANDLE ?
+plagcount dword 0
+three_word_shit byte 0
+
 buffer BYTE BUFFER_SIZE DUP(0)
 filename BYTE 80 DUP(0)
 fileHandle HANDLE ?
@@ -18,17 +26,84 @@ counter dword 0
 first_word_count dword 0
 second_word_count dword 0
 similar_words dword 0
+
+promptBad BYTE "Invalid input, please enter again",0
+decNum    DWORD ?
+
 .code
+
 main PROC
+
+mov edx,OFFSET asciFile
+call OpenInputFile
+mov asciFileHandle, eax
+
+call Clrscr;
+
+;mov  eax,black+(gray*16);
+;call setTextColor
+
+mov edx,OFFSET asciBuffer 
+mov ecx,BUFFER_SIZE
+call ReadFromFile
+mov asciBuffer[eax],0 ; insert null terminator
+mWriteString offset asciBuffer
+
+call crlf
+call crlf
+call crlf
+call crlf
+
+mWrite "Do you want to enter the texts manually or want to read from file : "
+call crlf
+mWrite "Press 1 to enter text manually"
+call crlf 
+mWrite "Press 2 to read data from file"
+
+read:  call ReadDec
+       jnc  goodInput
+	   cmp eax, 2
+	   jle goodInput
+
+       mov  edx,OFFSET promptBad
+       call WriteString
+       jmp  read        ;go input again
+
+goodInput:
+	cmp eax, 1
+	je manualentry
+	cmp eax, 2
+	je fileEntry
+
+manualentry:
+	mWrite "Enter text 1: "
+	mov edx, offset buffer
+	mov ecx, 5000
+	call ReadString
+	mov buffer[eax], 0
+	mWrite "Enter text 2: "
+	mov edx, offset buffer2
+	mov ecx, 5000
+	call ReadString
+	mov buffer2[eax], 0
+	jmp processing
+
+
+
+fileEntry :
 mWrite "Enter name for File 1:"
 mov edx,OFFSET filename
 mov ecx,SIZEOF filename
 call ReadString
+
 ;--------------------------------------
+
 ; Open the file for input.
+
 mov edx,OFFSET filename
 call OpenInputFile
 mov fileHandle,eax
+
 ;--------------------------------------
 
 ;--------------------------------------
@@ -90,6 +165,8 @@ call Crlf
 mov eax,fileHandle2
 call CloseFile
 ;--------------------------------------
+
+processing:
 
 INVOKE Str_length, ADDR buffer
 mWrite "FILE 1 SIZE BEFORE TRIMMING : "
@@ -268,6 +345,7 @@ checkingwords:
 		pop edx
 		INVOKE Str_compare, ADDR buffer2[ebx], ADDR buffer[esi]
 		je increment_similar
+			mov three_word_shit, 0
 		after_increment_similar:
 
 		INVOKE Str_length, ADDR buffer2[ebx]
@@ -293,7 +371,8 @@ call WriteDec
 call crlf
 exit
 zeroFileSize:
-mWrite "One of the files is empty so can't check for plagiarism"
+call crlf
+mWrite "One of the files is empty/does not exist so can't check for plagiarism"
 call crlf
 exit
 replacing_without_count:
@@ -335,6 +414,17 @@ exit
 increment_similar:
 	push eax
 	mov eax, 0
+	
+		;;;INVOKE Str_compare, ADDR buffer2[ebx], ADDR buffer[esi]
+		push esi
+			mov esi, pointer
+			same[esi]
+			INVOKE Str_copy, ADDR buffer2[ebx], ADDR same[esi]
+
+			inc esi
+
+		pop esi
+
 	inc similar_words
 	;inc eax
 	;mov similar_words, eax
