@@ -27,9 +27,13 @@ first_word_count dword 0
 second_word_count dword 0
 similar_words dword 0
 
+tempVar1 DWORD 0
+tempVar2 DWORD 0
+
 promptBad BYTE "Invalid input, please enter again",0
 decNum    DWORD ?
-
+same byte 1000 DUP(0)
+pointer dword 0
 .code
 
 main PROC
@@ -91,115 +95,114 @@ manualentry:
 
 
 fileEntry :
-mWrite "Enter name for File 1:"
-mov edx,OFFSET filename
-mov ecx,SIZEOF filename
-call ReadString
+	mWrite "Enter name for File 1:"
+	mov edx,OFFSET filename
+	mov ecx,SIZEOF filename
+	call ReadString
 
-;--------------------------------------
+	;-------------------------------------- 
+	; Open the file for input.
 
-; Open the file for input.
+	mov edx,OFFSET filename
+	call OpenInputFile
+	mov fileHandle,eax
 
-mov edx,OFFSET filename
-call OpenInputFile
-mov fileHandle,eax
+	;--------------------------------------
 
-;--------------------------------------
+	;--------------------------------------
+	; Read the file into a buffer.
 
-;--------------------------------------
-; Read the file into a buffer.
+	mov edx,OFFSET buffer
+	mov ecx,BUFFER_SIZE
+	call ReadFromFile
+	mov buffer[eax],0 ; insert null terminator
+	;---------------------------------------
 
-mov edx,OFFSET buffer
-mov ecx,BUFFER_SIZE
-call ReadFromFile
-mov buffer[eax],0 ; insert null terminator
-;---------------------------------------
-
-;--------------------------------------
-mWrite "File1 size: "
-call WriteDec ; display file size
-mov fileSize1, eax
-call Crlf
-; Display the buffer.
-mWrite <"File1 Buffer:",0dh,0ah,0dh,0ah>
-mov edx,OFFSET buffer ; display the buffer
-call WriteString
-call Crlf
-mov eax,fileHandle
-call CloseFile
-;--------------------------------------
-
+	;--------------------------------------
+	mWrite "File1 size: "
+	call WriteDec ; display file size
+	mov fileSize1, eax
+	call Crlf
+	; Display the buffer.
+	mWrite <"File1 Buffer:",0dh,0ah,0dh,0ah>
+	mov edx,OFFSET buffer ; display the buffer
+	call WriteString
+	call Crlf
+	mov eax,fileHandle
+	call CloseFile
+	;--------------------------------------
 
 
-mWrite "Enter name for File 2:"
-mov edx,OFFSET filename2
-mov ecx,SIZEOF filename2
-call ReadString
 
-;--------------------------------------
-; Open the file for input.
-mov edx,OFFSET filename2
-call OpenInputFile
-mov fileHandle2,eax
-;--------------------------------------
+	mWrite "Enter name for File 2:"
+	mov edx,OFFSET filename2
+	mov ecx,SIZEOF filename2
+	call ReadString
 
-;--------------------------------------
-; Read the file into a buffer.
+	;--------------------------------------
+	; Open the file for input.
+	mov edx,OFFSET filename2
+	call OpenInputFile
+	mov fileHandle2,eax
+	;--------------------------------------
 
-mov edx,OFFSET buffer2
-mov ecx,BUFFER_SIZE
-call ReadFromFile
-mov buffer2[eax],0 ; insert null terminator
-;---------------------------------------
+	;--------------------------------------
+	; Read the file into a buffer.
 
-;--------------------------------------
-mWrite "File2 size: "
-call WriteDec ; display file size
-mov fileSize2, eax
-call Crlf
-; Display the buffer.
-mWrite <"File2 Buffer:",0dh,0ah,0dh,0ah>
-mov edx,OFFSET buffer2 ; display the buffer
-call WriteString
-call Crlf
-mov eax,fileHandle2
-call CloseFile
-;--------------------------------------
+	mov edx,OFFSET buffer2
+	mov ecx,BUFFER_SIZE
+	call ReadFromFile
+	mov buffer2[eax],0 ; insert null terminator
+	;---------------------------------------
+
+	;--------------------------------------
+	mWrite "File2 size: "
+	call WriteDec ; display file size
+	mov fileSize2, eax
+	call Crlf
+	; Display the buffer.
+	mWrite <"File2 Buffer:",0dh,0ah,0dh,0ah>
+	mov edx,OFFSET buffer2 ; display the buffer
+	call WriteString
+	call Crlf
+	mov eax,fileHandle2
+	call CloseFile
+	;--------------------------------------
 
 processing:
 
-INVOKE Str_length, ADDR buffer
-mWrite "FILE 1 SIZE BEFORE TRIMMING : "
-call WriteDec
-call crlf
-cmp eax, 0
-je zeroFileSize
-INVOKE Str_length, ADDR buffer2
-mWrite "FILE 2 SIZE BEFORE TRIMMING : "
-call WriteDec
-call crlf
-cmp eax, 0
-je zeroFileSize
+	INVOKE Str_length, ADDR buffer
+	mWrite "FILE 1 SIZE BEFORE TRIMMING : "
+	call WriteDec
+	call crlf
+	cmp eax, 0
+	je zeroFileSize
+	INVOKE Str_length, ADDR buffer2
+	mWrite "FILE 2 SIZE BEFORE TRIMMING : "
+	call WriteDec
+	call crlf
+	cmp eax, 0
+	je zeroFileSize
 
 
-; Cleaning the buffers from trailing spaces
+	; Cleaning the buffers from trailing spaces
 
-INVOKE Str_trim, ADDR buffer, ' '
-INVOKE Str_trim, ADDR buffer2, ' '
-INVOKE str_trim, ADDR buffer2, '.'
-INVOKE Str_trim, ADDR buffer, 0ah
-INVOKE Str_trim, ADDR buffer, 0dh
-INVOKE str_trim, ADDR buffer, '.'
-INVOKE Str_trim, ADDR buffer2, 0ah
-INVOKE Str_trim, ADDR buffer2, 0dh
-
-INVOKE Str_length, ADDR buffer
-mov ecx, eax
-inc ecx
-
-L1:
 	INVOKE Str_trim, ADDR buffer, ' '
+	INVOKE Str_trim, ADDR buffer2, ' '
+	INVOKE str_trim, ADDR buffer2, '.'
 	INVOKE Str_trim, ADDR buffer, 0ah
+	INVOKE Str_trim, ADDR buffer, 0dh
+	INVOKE str_trim, ADDR buffer, '.'
+	INVOKE Str_trim, ADDR buffer2, 0ah
+	INVOKE Str_trim, ADDR buffer2, 0dh
+
+	INVOKE Str_length, ADDR buffer
+	mov ecx, eax
+	inc ecx
+
+	L1:
+		INVOKE Str_trim, ADDR buffer, ' '
+		INVOKE Str_trim, ADDR buffer, 0ah
 	INVOKE Str_trim, ADDR buffer, 0dh
 	INVOKE Str_trim, ADDR buffer, '.'
 loop l1
@@ -241,6 +244,7 @@ replace:
 	je replacing
 	mov al, 0ah
 	cmp buffer[esi], al
+
 	je replacing
 	mov al, 0dh
 	cmp buffer[esi], al
@@ -263,7 +267,6 @@ replace:
 	mov al, '?'
 	cmp buffer[esi], al
 	je replacing_without_count
-
 after_replaced: inc esi
 pop eax
 dec ecx
@@ -297,9 +300,20 @@ replace2:
 	mov al, '.'
 	cmp buffer2[esi], al
 	je replacing_without_count2
+	cmp buffer2[esi], al
+	je replacing_without_count2
+	mov al, '!'
+	cmp buffer2[esi], al
+	je replacing_without_count2
+	mov al, '?'
+	cmp buffer2[esi], al
+	je replacing_without_count2
+
 after_replaced2: inc esi
 pop eax
-loop replace2
+cmp ecx, 0
+dec ecx
+jne replace2
 ;
 push eax
 	mov eax, first_word_count
@@ -310,7 +324,6 @@ push eax
 	mWrite "Words in second file : "
 	call WriteDec
 	call crlf
-
 pop eax
 
 ; printing words 1 by 1
@@ -332,6 +345,11 @@ checkingwords:
 	mov ecx, second_word_count
 	inc ecx
 	checkingwords2:
+		
+		after_increment3:
+		cmp buffer[esi], 0
+		je increment_esi2
+
 		mov eax, offset buffer2
 		after_increment2:
 		cmp buffer2[ebx], 0
@@ -342,15 +360,32 @@ checkingwords:
 			mWrite " Second File : "
 			call WriteString
 			call crlf
+			call crlf
+			call crlf
+			push eax
+			mov eax,pointer 
+			call WriteDec
+			pop eax
+			call crlf
+			mWrite "SAME STRING : "
+			mWriteString offset same
+			call crlf
 		pop edx
 		INVOKE Str_compare, ADDR buffer2[ebx], ADDR buffer[esi]
 		je increment_similar
+			mov ebx, tempVar1
+			mov esi, tempVar2
+			cmp three_word_shit, 3
+			jge printsame
 			mov three_word_shit, 0
+			mov pointer, 0
+			INVOKE Str_length, ADDR buffer2[ebx]
+			add ebx, eax
 		after_increment_similar:
 
-		INVOKE Str_length, ADDR buffer2[ebx]
-		add ebx, eax
-		loop checkingwords2
+	cmp ecx, 0
+		dec ecx
+		jne checkingwords2
 	pop ecx
 	INVOKE Str_length, ADDR buffer[esi]
 	add esi, eax
@@ -412,18 +447,31 @@ increment_ebx:
 jmp after_increment2
 exit
 increment_similar:
+	cmp pointer,0
+	jne saving_ebx
+	after_save:
 	push eax
 	mov eax, 0
 	
 		;;;INVOKE Str_compare, ADDR buffer2[ebx], ADDR buffer[esi]
 		push esi
+			inc three_word_shit
 			mov esi, pointer
-			same[esi]
+			;same[esi]
 			INVOKE Str_copy, ADDR buffer2[ebx], ADDR same[esi]
+			; length 
 
+			INVOKE Str_length, ADDR buffer2[ebx]
+			add esi, eax
+			mov same[esi], ' '
 			inc esi
-
+			mov same[esi], ' '
+			mov pointer, esi
 		pop esi
+		INVOKE Str_length, ADDR buffer2[ebx]
+		add ebx, eax
+		INVOKE Str_length, ADDR buffer[esi]
+		add esi, eax
 
 	inc similar_words
 	;inc eax
@@ -438,5 +486,19 @@ increment_similar:
 	pop eax
 	call crlf
 jmp after_increment_similar
+
+printsame:
+	mWrite "This line is the same in both text : "
+	call crlf
+	mWriteString offset same
+	mov pointer, 0
+
+increment_esi2:
+	inc esi
+jmp after_increment3
+saving_ebx :
+	mov tempVar1, ebx
+	mov tempVar2, esi
+jmp after_save
 main ENDP
 END main
