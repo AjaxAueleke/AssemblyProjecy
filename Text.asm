@@ -172,15 +172,15 @@ fileEntry :
 processing:
 
 	INVOKE Str_length, ADDR buffer
-	mWrite "FILE 1 SIZE BEFORE TRIMMING : "
-	call WriteDec
-	call crlf
+	;mWrite "FILE 1 SIZE BEFORE TRIMMING : "
+	;call WriteDec
+	;call crlf
 	cmp eax, 0
 	je zeroFileSize
 	INVOKE Str_length, ADDR buffer2
-	mWrite "FILE 2 SIZE BEFORE TRIMMING : "
-	call WriteDec
-	call crlf
+	;mWrite "FILE 2 SIZE BEFORE TRIMMING : "
+	;call WriteDec
+	;call crlf
 	cmp eax, 0
 	je zeroFileSize
 
@@ -339,6 +339,11 @@ checkingwords:
 	add edx, esi
 	mov ebx, 0
 	push ecx
+	push edx
+	mWrite "First File : ";
+	call WriteString
+	call crlf
+	pop edx
 	mov ecx, second_word_count
 	inc ecx
 	checkingwords2:
@@ -349,29 +354,36 @@ checkingwords:
 		after_increment2:
 		cmp buffer2[ebx], 0
 		je increment_ebx
-		mWriteString offset same
-		call crlf
 		add eax, ebx
 		push edx
 		mov edx, eax
+
 		push eax
+		mWrite "Second File : "
+		call WriteString
+		call crlf
+		mWrite "Same : "
+		mov edx, offset same 
+		call crlf
 		mov eax,pointer 
 		pop eax
 		pop edx
 		INVOKE Str_compare, ADDR buffer2[ebx], ADDR buffer[esi]
 		je increment_similar
-			mov ebx, tempVar1
-			mov esi, tempVar2
+			;mov ebx, tempVar1
+			;mov esi, tempVar2
 			cmp three_word_shit, 3
 			jge printsame
-after_print_same: 
-		;INVOKE Str_length, ADDR buffer2[ebx]
-			;add ebx, eax
+		INVOKE Str_length, ADDR buffer2[ebx]
+		add ebx, eax
 after_increment_similar:
 	cmp ecx, 0
 	dec ecx
 	jne checkingwords2
+after_print_same: 
 	pop ecx
+	sub ecx, three_word_shit
+	mov three_word_shit, 0
 	INVOKE Str_length, ADDR buffer[esi]
 	add esi, eax
 	dec ecx
@@ -430,19 +442,28 @@ increment_ebx:
 jmp after_increment2
 exit
 increment_similar:
-	cmp pointer,0
-	je saving_ebx
+	;cmp pointer,0
+	;je saving_ebx
 	after_save:
 	push eax
 	mov eax, 0
 	
 		;;;INVOKE Str_compare, ADDR buffer2[ebx], ADDR buffer[esi]
 		push esi
-
+			mWrite "Value of three word shit"
+			push eax
+			mov eax, three_word_shit
+			call WriteDec
+			call crlf
+			pop eax
 			inc three_word_shit
 			mov esi, pointer
 			;same[esi]
 			INVOKE Str_copy, ADDR buffer2[ebx], ADDR same[esi]
+			mWrite "Value of same after concatenation : "
+			mWriteString offset same
+			call crlf
+
 			; length 
 
 			INVOKE Str_length, ADDR buffer2[ebx]
@@ -493,6 +514,8 @@ jmp after_print_same
 increment_esi2:
 	inc esi
 jmp after_increment3
+
+
 saving_ebx :
 	mov tempVar1, ebx
 	mov tempVar2, esi
