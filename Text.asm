@@ -340,9 +340,9 @@ checkingwords:
 	mov ebx, 0
 	push ecx
 	push edx
-	mWrite "First File : ";
-	call WriteString
-	call crlf
+	;mWrite "First File : ";
+	;call WriteString
+	;call crlf
 	pop edx
 	mov ecx, second_word_count
 	inc ecx
@@ -359,12 +359,13 @@ checkingwords:
 		mov edx, eax
 
 		push eax
-		mWrite "Second File : "
-		call WriteString
-		call crlf
-		mWrite "Same : "
-		mov edx, offset same 
-		call crlf
+		;mWrite "Second File : "
+		;call WriteString
+		;call crlf
+		;mWrite "Same : "
+		;mov edx, offset same 
+		;call crlf
+		;call crlf
 		mov eax,pointer 
 		pop eax
 		pop edx
