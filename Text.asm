@@ -337,15 +337,11 @@ checkingwords:
 	cmp buffer[esi], 0
 	je increment_esi
 	add edx, esi
-	mWrite " First File : "
-	call WriteString
-	call crlf
 	mov ebx, 0
 	push ecx
 	mov ecx, second_word_count
 	inc ecx
 	checkingwords2:
-		
 		after_increment3:
 		cmp buffer[esi], 0
 		je increment_esi2
@@ -357,19 +353,13 @@ checkingwords:
 		add eax, ebx
 		push edx
 			mov edx, eax
-			mWrite " Second File : "
-			call WriteString
 			call crlf
 			call crlf
 			call crlf
 			push eax
 			mov eax,pointer 
 			call WriteDec
-			pop eax
-			call crlf
-			mWrite "SAME STRING : "
-			mWriteString offset same
-			call crlf
+		pop eax
 		pop edx
 		INVOKE Str_compare, ADDR buffer2[ebx], ADDR buffer[esi]
 		je increment_similar
@@ -377,39 +367,37 @@ checkingwords:
 			mov esi, tempVar2
 			cmp three_word_shit, 3
 			jge printsame
-			mov three_word_shit, 0
+after_print_same: mov three_word_shit, 0
 			mov pointer, 0
 			INVOKE Str_length, ADDR buffer2[ebx]
 			add ebx, eax
-		after_increment_similar:
+after_increment_similar:
 
 	cmp ecx, 0
-		dec ecx
-		jne checkingwords2
+	dec ecx
+	jne checkingwords2
 	pop ecx
 	INVOKE Str_length, ADDR buffer[esi]
 	add esi, eax
-dec ecx
-cmp ecx, 0
-jne checkingwords
+	dec ecx
+	cmp ecx, 0
+	jne checkingwords
 
-pop ecx
-mov eax, 0
-mov eax, first_word_count
-call WriteDec
-call crlf
-mov eax, second_word_count
-call WriteDec
-call crlf
-mov eax, similar_words
-call WriteDec
-call crlf
-exit
-zeroFileSize:
-call crlf
-mWrite "One of the files is empty/does not exist so can't check for plagiarism"
-call crlf
-exit
+	pop ecx
+	mov eax, 0
+	mov eax, first_word_count
+	call WriteDec
+	call crlf
+	mov eax, second_word_count 
+	call WriteDec
+	call crlf
+	mov eax, similar_words
+	call WriteDec
+	call crlf
+	exit
+zeroFileSize: call crlf
+			call crlf
+			exit
 replacing_without_count:
 	mov buffer[esi], 0
 jmp after_replaced
@@ -448,7 +436,7 @@ jmp after_increment2
 exit
 increment_similar:
 	cmp pointer,0
-	jne saving_ebx
+	je saving_ebx
 	after_save:
 	push eax
 	mov eax, 0
@@ -477,12 +465,7 @@ increment_similar:
 	;inc eax
 	;mov similar_words, eax
 	call crlf
-	call crlf
-	mWrite "Similar Count : "
 	mov eax, similar_words
-	call WriteDec
-	call crlf
-	call crlf
 	pop eax
 	call crlf
 jmp after_increment_similar
@@ -492,7 +475,7 @@ printsame:
 	call crlf
 	mWriteString offset same
 	mov pointer, 0
-
+jmp after_print_same
 increment_esi2:
 	inc esi
 jmp after_increment3
