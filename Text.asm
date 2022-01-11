@@ -8,7 +8,7 @@ asciBuffer BYTE BUFFER_SIZE DUP(0)
 asciFile BYTE 'ASCII.txt', 0
 asciFileHandle HANDLE ?
 plagcount dword 0
-three_word_shit byte 0
+three_word_shit dword 0
 
 buffer BYTE BUFFER_SIZE DUP(0)
 filename BYTE 80 DUP(0)
@@ -345,20 +345,17 @@ checkingwords:
 		after_increment3:
 		cmp buffer[esi], 0
 		je increment_esi2
-
 		mov eax, offset buffer2
 		after_increment2:
 		cmp buffer2[ebx], 0
 		je increment_ebx
+		mWriteString offset same
+		call crlf
 		add eax, ebx
 		push edx
-			mov edx, eax
-			call crlf
-			call crlf
-			call crlf
-			push eax
-			mov eax,pointer 
-			call WriteDec
+		mov edx, eax
+		push eax
+		mov eax,pointer 
 		pop eax
 		pop edx
 		INVOKE Str_compare, ADDR buffer2[ebx], ADDR buffer[esi]
@@ -367,12 +364,10 @@ checkingwords:
 			mov esi, tempVar2
 			cmp three_word_shit, 3
 			jge printsame
-after_print_same: mov three_word_shit, 0
-			mov pointer, 0
-			INVOKE Str_length, ADDR buffer2[ebx]
-			add ebx, eax
+after_print_same: 
+		;INVOKE Str_length, ADDR buffer2[ebx]
+			;add ebx, eax
 after_increment_similar:
-
 	cmp ecx, 0
 	dec ecx
 	jne checkingwords2
@@ -443,6 +438,7 @@ increment_similar:
 	
 		;;;INVOKE Str_compare, ADDR buffer2[ebx], ADDR buffer[esi]
 		push esi
+
 			inc three_word_shit
 			mov esi, pointer
 			;same[esi]
@@ -472,9 +468,27 @@ jmp after_increment_similar
 
 printsame:
 	mWrite "This line is the same in both text : "
-	call crlf
 	mWriteString offset same
+	call crlf
+
 	mov pointer, 0
+	push ecx
+			mov ecx, 1000
+			l100:
+				mov same[ecx], 0
+			loop l100
+			mov ecx, three_word_shit
+			push eax
+			l111:
+			INVOKE Str_length, ADDR buffer2[ebx]
+				add ebx, eax
+				INVOKE Str_length, ADDR buffer[esi]
+				add esi, eax
+			loop l111
+			pop eax
+			pop ecx
+			mov pointer, 0
+			
 jmp after_print_same
 increment_esi2:
 	inc esi
