@@ -362,9 +362,11 @@ checkingwords:
 		;mWrite "Second File : "
 		;call WriteString
 		;call crlf
-		;mWrite "Same : "
-		;mov edx, offset same 
-		;call crlf
+		mWrite "Same : "
+		mov edx, offset same 
+		call WriteString
+		call crlf
+		
 		;call crlf
 		mov eax,pointer 
 		pop eax
@@ -454,15 +456,15 @@ increment_similar:
 			mWrite "Value of three word shit"
 			push eax
 			mov eax, three_word_shit
-			call WriteDec
+			;call WriteDec
 			call crlf
 			pop eax
 			inc three_word_shit
 			mov esi, pointer
 			;same[esi]
 			INVOKE Str_copy, ADDR buffer2[ebx], ADDR same[esi]
-			mWrite "Value of same after concatenation : "
-			mWriteString offset same
+			;mWrite "Value of same after concatenation : "
+			;mWriteString offset same
 			call crlf
 
 			; length 
