@@ -1,7 +1,13 @@
 INCLUDE Irvine32.inc
 INCLUDE macros.inc
-BUFFER_SIZE = 5000
+BUFFER_SIZE = 50000
 .data
+outText byte "emailfile.txt"
+difficult_words dword 0
+easy_words dword 0
+email_address dword 50 DUP (0)
+email_sender byte 1000 DUP (0)
+
 ;------ ASCII Art ------;
 
 asciBuffer BYTE BUFFER_SIZE DUP(0)
@@ -57,7 +63,14 @@ call crlf
 call crlf
 call crlf
 call crlf
-
+push edx
+push ecx
+	mov ecx, 50
+	mWrite "Enter your email address : "
+	mov edx, offset email_address
+	call ReadString 
+pop ecx
+pop edx
 mWrite "Do you want to enter the texts manually or want to read from file : "
 call crlf
 mWrite "Press 1 to enter text manually"
@@ -340,9 +353,9 @@ checkingwords:
 	mov ebx, 0
 	push ecx
 	push edx
-	;mWrite "First File : ";
-	;call WriteString
-	;call crlf
+	mWrite "First File : ";
+	call WriteString
+	call crlf
 	pop edx
 	mov ecx, second_word_count
 	inc ecx
@@ -359,14 +372,10 @@ checkingwords:
 		mov edx, eax
 
 		push eax
-		;mWrite "Second File : "
-		;call WriteString
-		;call crlf
-		mWrite "Same : "
-		mov edx, offset same 
+		mWrite "Second File : "
 		call WriteString
 		call crlf
-		
+	
 		;call crlf
 		mov eax,pointer 
 		pop eax
@@ -375,24 +384,41 @@ checkingwords:
 		je increment_similar
 			;mov ebx, tempVar1
 			;mov esi, tempVar2
+
+after_increment_similar:
 			cmp three_word_shit, 3
 			jge printsame
 		INVOKE Str_length, ADDR buffer2[ebx]
 		add ebx, eax
-after_increment_similar:
+
 	cmp ecx, 0
 	dec ecx
 	jne checkingwords2
 after_print_same: 
 	pop ecx
+	push eax
+	mWrite "ECX VALUE AT THE END : "
+	mov eax, ecx
+
+	call WriteDec
+	call crlf
+	mWrite "Three words value at the end : "
+	mov eax, three_word_shit
+	call WriteDec
+	call crlf
+	;call crlf
+	pop eax
+	cmp ecx, three_word_shit
+	jle after_check
 	sub ecx, three_word_shit
 	mov three_word_shit, 0
 	INVOKE Str_length, ADDR buffer[esi]
 	add esi, eax
 	dec ecx
 	cmp ecx, 0
-	jne checkingwords
+	jg checkingwords
 
+	after_check :
 	pop ecx
 	mov eax, 0
 	mov eax, first_word_count
@@ -404,6 +430,19 @@ after_print_same:
 	mov eax, similar_words
 	call WriteDec
 	call crlf
+
+	; -------------------------- EMAIL EMAIL EMAIL ----------------------------
+	push edx
+	push ecx
+	mWrite "EMAIL SENDER : "
+	mWriteString offset email_sender
+	mov edx, offset outText 
+	call CreateOutputFile
+	mov ecx, 1000
+	mov edx, offset email_address
+	call WriteToFile
+	pop edx
+	pop ecx
 	exit
 zeroFileSize: call crlf
 			call crlf
@@ -450,13 +489,15 @@ increment_similar:
 	after_save:
 	push eax
 	mov eax, 0
-	
+	mWrite "Same : "
+	mWriteString offset same
+	call crlf
 		;;;INVOKE Str_compare, ADDR buffer2[ebx], ADDR buffer[esi]
 		push esi
 			mWrite "Value of three word shit"
 			push eax
 			mov eax, three_word_shit
-			;call WriteDec
+			call WriteDec
 			call crlf
 			pop eax
 			inc three_word_shit
@@ -465,7 +506,7 @@ increment_similar:
 			INVOKE Str_copy, ADDR buffer2[ebx], ADDR same[esi]
 			;mWrite "Value of same after concatenation : "
 			;mWriteString offset same
-			call crlf
+			;call crlf
 
 			; length 
 
@@ -487,14 +528,25 @@ increment_similar:
 	call crlf
 	mov eax, similar_words
 	pop eax
-	call crlf
+;	call crlf
 jmp after_increment_similar
 
 printsame:
+; --- EMAIL ----
+	push esi
+		push eax
+		mWrite "Under print same : "
+		mWriteString offset same
+		call crlf
+		INVOKE Str_length, ADDR email_sender
+		dec eax
+		INVOKE Str_copy, ADDR same, ADDR email_sender[eax] 
+		pop eax
+	pop esi
+; ---- EMAIL -----
 	mWrite "This line is the same in both text : "
 	mWriteString offset same
 	call crlf
-
 	mov pointer, 0
 	push ecx
 			mov ecx, 1000
