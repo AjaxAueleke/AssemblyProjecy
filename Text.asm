@@ -2,10 +2,10 @@ INCLUDE Irvine32.inc
 INCLUDE macros.inc
 BUFFER_SIZE = 50000
 .data
-outText byte "emailfile.txt"
+outText byte "emailfile.txt",0
 difficult_words dword 0
 easy_words dword 0
-email_address dword 50 DUP (0)
+email_address dword 50 DUP (' ')
 email_sender byte 1000 DUP (0)
 
 ;------ ASCII Art ------;
