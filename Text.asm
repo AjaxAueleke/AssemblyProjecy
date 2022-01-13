@@ -6,7 +6,7 @@ outText byte "emailfile.txt",0
 difficult_words dword 0
 easy_words dword 0
 email_address dword 50 DUP (' ')
-email_sender byte 1000 DUP (0)
+email_sender byte "The characters that are the same in both are : ", 1000 DUP (0)
 
 ;------ ASCII Art ------;
 
@@ -353,9 +353,9 @@ checkingwords:
 	mov ebx, 0
 	push ecx
 	push edx
-	mWrite "First File : ";
-	call WriteString
-	call crlf
+	;mWrite "First File : ";
+	;call WriteString
+	;call crlf
 	pop edx
 	mov ecx, second_word_count
 	inc ecx
@@ -372,9 +372,9 @@ checkingwords:
 		mov edx, eax
 
 		push eax
-		mWrite "Second File : "
-		call WriteString
-		call crlf
+		;mWrite "Second File : "
+		;call WriteString
+		;call crlf
 	
 		;call crlf
 		mov eax,pointer 
@@ -397,15 +397,15 @@ after_increment_similar:
 after_print_same: 
 	pop ecx
 	push eax
-	mWrite "ECX VALUE AT THE END : "
+	;mWrite "ECX VALUE AT THE END : "
 	mov eax, ecx
 
-	call WriteDec
-	call crlf
-	mWrite "Three words value at the end : "
-	mov eax, three_word_shit
-	call WriteDec
-	call crlf
+	;call WriteDec
+	;call crlf
+	;mWrite "Three words value at the end : "
+	;mov eax, three_word_shit
+	;call WriteDec
+	;call crlf
 	;call crlf
 	pop eax
 	cmp ecx, three_word_shit
@@ -421,15 +421,15 @@ after_print_same:
 	after_check :
 	pop ecx
 	mov eax, 0
-	mov eax, first_word_count
-	call WriteDec
-	call crlf
-	mov eax, second_word_count 
-	call WriteDec
-	call crlf
-	mov eax, similar_words
-	call WriteDec
-	call crlf
+	;mov eax, first_word_count
+	;call WriteDec
+	;call crlf
+	;mov eax, second_word_count 
+	;call WriteDec
+	;call crlf
+	;mov eax, similar_words
+	;call WriteDec
+	;call crlf
 
 	; -------------------------- EMAIL EMAIL EMAIL ----------------------------
 	push edx
@@ -489,16 +489,16 @@ increment_similar:
 	after_save:
 	push eax
 	mov eax, 0
-	mWrite "Same : "
-	mWriteString offset same
-	call crlf
+	;mWrite "Same : "
+	;mWriteString offset same
+	;call crlf
 		;;;INVOKE Str_compare, ADDR buffer2[ebx], ADDR buffer[esi]
 		push esi
-			mWrite "Value of three word shit"
+			;mWrite "Value of three word shit"
 			push eax
-			mov eax, three_word_shit
-			call WriteDec
-			call crlf
+			;mov eax, three_word_shit
+			;call WriteDec
+			;call crlf
 			pop eax
 			inc three_word_shit
 			mov esi, pointer
@@ -535,12 +535,13 @@ printsame:
 ; --- EMAIL ----
 	push esi
 		push eax
-		mWrite "Under print same : "
-		mWriteString offset same
-		call crlf
+		;mWrite "Under print same : "
+		;mWriteString offset same
+		;call crlf
 		INVOKE Str_length, ADDR email_sender
 		dec eax
 		INVOKE Str_copy, ADDR same, ADDR email_sender[eax] 
+		;mov email_sender[eax], 0dh
 		pop eax
 	pop esi
 ; ---- EMAIL -----
